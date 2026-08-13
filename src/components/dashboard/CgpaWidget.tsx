@@ -27,12 +27,10 @@ export function CgpaWidget() {
     <>
       <button 
         onClick={() => setIsModalOpen(true)}
-        className="w-full bg-[#0A0A0C] border border-[#1A1A24] hover:border-white/20 hover:bg-white/[0.02] transition-all rounded-2xl p-5 shadow-lg h-[160px] flex flex-col justify-between group relative text-left"
+        className="w-full bg-[#0A0A0C] border border-white/5 hover:border-white/10 hover:bg-white/[0.02] transition-colors rounded-2xl p-5 shadow-[0_0_30px_rgba(0,0,0,0.5)] h-[160px] flex flex-col justify-between group relative text-left overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
-        
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-bold text-zinc-300">CGPA Forecaster</span>
+        <div className="flex justify-between items-center mb-2 relative z-10 w-full">
+          <span className="text-[10px] font-black tracking-widest uppercase text-zinc-500">CGPA Forecast</span>
           <Plus className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
         </div>
       

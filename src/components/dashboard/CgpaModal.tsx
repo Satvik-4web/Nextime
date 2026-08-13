@@ -123,7 +123,7 @@ export function CgpaModal({ isOpen, onClose }: Props) {
                               className="bg-[#121214] border border-white/10 rounded-lg px-3 py-1.5 text-sm font-bold text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer"
                             >
                               {GRADES.map(g => (
-                                <option key={g.value} value={g.value}>{g.label}</option>
+                                <option key={g.label} value={g.value}>{g.label}</option>
                               ))}
                             </select>
                           </div>

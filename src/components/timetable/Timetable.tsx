@@ -1,19 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { toPng } from "html-to-image";
 import { TimetableGrid } from "./TimetableGrid";
 import { TimetableDetailPanel } from "./TimetableDetailPanel";
 import { useAppStore } from "@/stores/useAppStore";
 import { ClassType, TimetableEvent } from "@/types/timetable";
 import { cn } from "@/lib/utils";
-import { Filter, Calendar, LayoutGrid, Plus, X } from "lucide-react";
+import { Filter, Calendar, LayoutGrid, Plus, X, Maximize2, Minimize2, Download, ArrowLeft } from "lucide-react";
 import { AddFriendModal } from "@/components/dashboard/AddFriendModal";
+import { ElectivePickerModal } from "@/components/dashboard/ElectivePickerModal";
+import { useTime } from "@/hooks/useTime";
+import { getCurrentClass, getNextClass, parseTime } from "@/lib/timetableUtils";
 
 export function Timetable() {
   const { selectedBatch, timetables, isLoaded, pinnedBatches, unpinBatch, customEvents } = useAppStore();
   const [viewMode, setViewMode] = useState<"today" | "week">("week");
   const [activeBatch, setActiveBatch] = useState<string | null>(selectedBatch);
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isCustomizeMode, setIsCustomizeMode] = useState(false);
+  const timetableRef = useRef<HTMLDivElement>(null);
+  const now = useTime(1000);
 
   useEffect(() => {
     setActiveBatch(selectedBatch);
@@ -25,6 +35,7 @@ export function Timetable() {
     tutorial: true,
   });
   const [selectedEvent, setSelectedEvent] = useState<TimetableEvent | null>(null);
+  const [pickingElectiveEvent, setPickingElectiveEvent] = useState<TimetableEvent | null>(null);
 
   const toggleFilter = (type: ClassType) => {
     setFilters(prev => ({ ...prev, [type]: !prev[type] }));
@@ -40,17 +51,86 @@ export function Timetable() {
     return event;
   });
 
+  const { toggleElectiveSlot, electiveSlots } = useAppStore();
+
   const filteredEvents = mergedEvents.filter(event => filters[event.type]);
 
   const handleEventClick = (event: TimetableEvent) => {
-    setSelectedEvent(event);
+    if (isCustomizeMode) {
+      toggleElectiveSlot(event.id);
+      return;
+    }
+
+    if (electiveSlots[event.id]) {
+      // If it's an elective slot, open picker
+      setPickingElectiveEvent(event);
+    } else {
+      setSelectedEvent(event);
+    }
   };
 
-  return (
-    <div className="flex flex-col h-full gap-4">
+  const currentClass = getCurrentClass(currentBatchEvents, now);
+  const nextClass = getNextClass(currentBatchEvents, now);
+
+  const formatTimeRemaining = (targetTime: Date) => {
+    const diff = targetTime.getTime() - now.getTime();
+    if (diff <= 0) return "0 min";
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins} min`;
+  };
+
+  const handleDownload = async () => {
+    if (!timetableRef.current) return;
+    try {
+      setIsDownloading(true);
+      // Wait for React to apply the expanded styles to the DOM and any animations to settle
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Capture the fully expanded node
+      const dataUrl = await toPng(timetableRef.current, { 
+        cacheBust: true, 
+        backgroundColor: '#050505',
+        pixelRatio: 2 // High-res download
+      });
+      
+      setIsDownloading(false);
+
+      const link = document.createElement('a');
+      link.download = `Timetable-${activeBatch || 'MyBatch'}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to download image', err);
+      setIsDownloading(false);
+    }
+  };
+
+  const timetableContent = (
+    <div 
+      ref={timetableRef}
+      className={cn(
+        "flex flex-col gap-4 transition-all duration-500",
+        isFullscreen && !isDownloading
+          ? "fixed inset-0 z-[1000] bg-[#050505] p-4 md:p-8 overflow-y-auto" 
+          : "",
+        isDownloading ? "fixed top-0 left-0 z-[9999] w-[1200px] h-auto p-8 bg-[#050505] rounded-none border-none shadow-none" : ""
+      )}
+    >
       {/* Top Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-shrink-0">
         <div className="flex items-center gap-4">
+          {isFullscreen && !isDownloading && (
+            <button 
+              onClick={() => setIsFullscreen(false)}
+              className="flex items-center gap-2 text-sm font-bold text-zinc-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+          )}
           <h2 className="text-xl font-bold">Timetable</h2>
           
           {/* Stushark Tabs */}
@@ -85,32 +165,57 @@ export function Timetable() {
         
         {/* Action Icons */}
         <div className="flex items-center gap-4 text-zinc-500">
+          <button 
+            onClick={() => setIsCustomizeMode(!isCustomizeMode)}
+            className={cn(
+              "px-3 py-1 rounded-full text-xs font-bold transition-all border",
+              isCustomizeMode 
+                ? "bg-purple-500/20 text-purple-400 border-purple-500/30" 
+                : "border-white/5 text-zinc-400 hover:text-white hover:bg-white/5"
+            )}
+          >
+            {isCustomizeMode ? "Done" : "Customize"}
+          </button>
+          
+          <button onClick={handleDownload} className="hover:text-white transition-colors" title="Download Timetable">
+            <Download className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={() => setIsFullscreen(!isFullscreen)} 
+            className="hover:text-white transition-colors"
+            title={isFullscreen ? "Exit Full Screen" : "Full Screen"}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
           <button className="hover:text-white transition-colors"><LayoutGrid className="w-4 h-4" /></button>
-          <button className="hover:text-white transition-colors"><Filter className="w-4 h-4" /></button>
           <button className="flex items-center gap-1.5 text-xs font-medium hover:text-white transition-colors"><Calendar className="w-4 h-4" /> Overview</button>
         </div>
       </div>
 
       {/* Sub Header */}
-      <div className="flex justify-between items-center text-xs">
+      <div className="flex justify-between items-center text-xs flex-shrink-0">
         <div className="flex items-center gap-4">
           <div className="flex flex-col">
-            <span className="font-bold text-zinc-300">Jul 27 — Aug 01</span>
-            <span className="text-zinc-500">Week 5</span>
+            <span className="font-bold text-zinc-300 tracking-wide uppercase text-[10px]">Today</span>
+            <span className="text-zinc-500 text-xs">{now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
           </div>
           
-          <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600/20 to-blue-900/20 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
-            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" />
-            <span className="font-bold text-blue-400 tracking-wider text-[10px] uppercase">Now</span>
-            <span className="font-extrabold text-white">IMAGE PROCESSING</span>
-            <span className="text-blue-200/60 font-medium">33 min remaining</span>
-          </div>
+          {currentClass && (
+            <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600/20 to-emerald-900/20 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
+              <span className="font-bold text-emerald-400 tracking-wider text-[10px] uppercase">Now</span>
+              <span className="font-extrabold text-white max-w-[150px] truncate">{currentClass.subject}</span>
+              <span className="text-emerald-200/60 font-medium">{formatTimeRemaining(parseTime(currentClass.endTime, now))} left</span>
+            </div>
+          )}
 
-          <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
-            <span className="font-bold text-purple-400 tracking-wider text-[10px] uppercase">Next</span>
-            <span className="font-semibold text-zinc-300">UCS668P/UCS50P...</span>
-            <span className="text-zinc-500 font-medium">15:30 - L004/L102/LT102</span>
-          </div>
+          {nextClass && !currentClass && (
+            <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <span className="font-bold text-primary tracking-wider text-[10px] uppercase">Next</span>
+              <span className="font-semibold text-zinc-300 max-w-[150px] truncate">{nextClass.subject}</span>
+              <span className="text-zinc-500 font-medium">{nextClass.startTime} - {nextClass.room}</span>
+            </div>
+          )}
         </div>
 
         {/* View Toggle */}
@@ -137,25 +242,40 @@ export function Timetable() {
       </div>
 
       {/* Grid */}
-      <div className="flex-1 min-h-0">
+      <div className={cn("flex flex-col", isDownloading ? "h-auto" : "")}>
         <TimetableGrid 
           events={filteredEvents} 
           viewMode={viewMode} 
-          onEventClick={handleEventClick} 
+          onEventClick={handleEventClick}
+          isDownloading={isDownloading} 
+          isFullscreen={isFullscreen}
         />
       </div>
 
       {selectedEvent && (
         <TimetableDetailPanel 
           event={selectedEvent} 
-          isOpen={!!selectedEvent} 
           onClose={() => setSelectedEvent(null)} 
         />
       )}
 
+      <ElectivePickerModal
+        event={pickingElectiveEvent}
+        isOpen={!!pickingElectiveEvent}
+        onClose={() => setPickingElectiveEvent(null)}
+      />
+
       <AddFriendModal isOpen={isAddFriendOpen} onClose={() => setIsAddFriendOpen(false)} />
     </div>
   );
+
+  if (isFullscreen || isDownloading) {
+    if (typeof window !== "undefined") {
+      return createPortal(timetableContent, document.body);
+    }
+  }
+
+  return timetableContent;
 }
 
 function FilterButton({ active, onClick, label }: { active: boolean, onClick: () => void, label: string }) {

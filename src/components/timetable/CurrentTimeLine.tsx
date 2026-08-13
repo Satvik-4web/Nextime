@@ -32,13 +32,13 @@ export function CurrentTimeLine() {
       style={{ top: `${offset}px` }}
     >
       {/* Glowing Dot */}
-      <div className="absolute -left-2 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)] border-2 border-black flex items-center justify-center">
+      <div className="absolute -left-2 w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.8)] border-2 border-black flex items-center justify-center">
         <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
       </div>
       
       {/* Glowing Line */}
-      <div className="w-full h-[2px] bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] relative">
-        <div className="absolute inset-0 bg-blue-400 blur-[2px]" />
+      <div className="w-full h-[2px] bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] relative">
+        <div className="absolute inset-0 bg-emerald-400 blur-[2px]" />
       </div>
     </div>
   );

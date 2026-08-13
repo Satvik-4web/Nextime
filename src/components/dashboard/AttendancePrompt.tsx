@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/stores/useAppStore";
+import { useNotificationStore } from "@/stores/useNotificationStore";
 import { timeStringToMinutes, getCurrentTimeMinutes } from "@/lib/timetable-utils";
 import { TimetableEvent, DayOfWeek } from "@/types/timetable";
 import { Check, X, AlertCircle } from "lucide-react";
@@ -11,6 +12,7 @@ const DAYS: DayOfWeek[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday
 
 export function AttendancePrompt() {
   const { selectedBatch, timetables, attendanceData, updateAttendance, promptedClasses, markClassPrompted } = useAppStore();
+  const { addToast } = useNotificationStore();
   const [activePrompt, setActivePrompt] = useState<{ event: TimetableEvent; dateClassId: string } | null>(null);
 
   useEffect(() => {
@@ -65,6 +67,13 @@ export function AttendancePrompt() {
     
     markClassPrompted(dateClassId);
     setActivePrompt(null);
+    
+    addToast({
+      type: "ATTENDANCE",
+      title: "Attendance Updated",
+      message: `${event.subject} marked as ${attendedClass ? 'Present' : 'Absent'}`,
+      priority: "LOW"
+    });
     
     // Check again in 1 second in case there are multiple queued prompts
     setTimeout(checkClasses, 1000);

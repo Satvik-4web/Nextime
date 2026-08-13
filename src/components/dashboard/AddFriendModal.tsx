@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAppStore } from "@/stores/useAppStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X } from "lucide-react";
@@ -14,6 +15,11 @@ interface AddFriendModalProps {
 export function AddFriendModal({ isOpen, onClose }: AddFriendModalProps) {
   const { allBatches, pinBatch, pinnedBatches, selectedBatch } = useAppStore();
   const [search, setSearch] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const availableBatches = allBatches.filter(b => b !== selectedBatch && !pinnedBatches.includes(b));
   const filteredBatches = availableBatches.filter(b => b.toLowerCase().includes(search.toLowerCase()));
@@ -23,9 +29,11 @@ export function AddFriendModal({ isOpen, onClose }: AddFriendModalProps) {
     onClose();
   };
 
+  if (!mounted) return null;
+
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && createPortal(
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -81,7 +89,8 @@ export function AddFriendModal({ isOpen, onClose }: AddFriendModalProps) {
               )}
             </div>
           </motion.div>
-        </motion.div>
+        </motion.div>,
+        document.body
       )}
     </AnimatePresence>
   );

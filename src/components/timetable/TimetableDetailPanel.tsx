@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, User, Clock, CheckCircle2, FileText, CalendarDays, Edit2, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAppStore } from "@/stores/useAppStore";
 
 interface Props {
@@ -17,6 +18,11 @@ export function TimetableDetailPanel({ event, onClose }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editSubject, setEditSubject] = useState("");
   const [editRoom, setEditRoom] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (event) {
@@ -33,9 +39,11 @@ export function TimetableDetailPanel({ event, onClose }: Props) {
     }
   };
 
+  if (!mounted) return null;
+
   return (
     <AnimatePresence>
-      {event && (
+      {event && createPortal(
         <>
           {/* Backdrop */}
           <motion.div
@@ -181,7 +189,8 @@ export function TimetableDetailPanel({ event, onClose }: Props) {
             </div>
 
           </motion.div>
-        </>
+        </>,
+        document.body
       )}
     </AnimatePresence>
   );

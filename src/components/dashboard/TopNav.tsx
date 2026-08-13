@@ -1,13 +1,14 @@
 "use client";
 
-import { Search, Bell, Clock, ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDown, ArrowRight, Search } from "lucide-react";
 import { useAppStore } from "@/stores/useAppStore";
 import { cn } from "@/lib/utils";
+import { NotificationPanel } from "@/components/navigation/NotificationPanel";
 
 export function TopNav() {
   const { selectedBatch, setSelectedBatch } = useAppStore();
   return (
-    <header className="w-full flex items-center justify-between py-4 px-8 border-b border-white/5 bg-background/50 backdrop-blur-md sticky top-0 z-40">
+    <header className="w-full flex-shrink-0 flex items-center justify-between py-4 px-8 border-b border-white/5 bg-[#050505] backdrop-blur-md sticky top-0 z-40">
       
       {/* Left: Logo & Batch */}
       <div className="flex items-center gap-8">
@@ -28,7 +29,7 @@ export function TopNav() {
       {/* Center: Next Class Pill */}
       <div className="hidden md:flex items-center gap-4 px-1 py-1 pr-4 rounded-full bg-[#1A1A24] border border-[#2D2D4A] shadow-[0_0_20px_rgba(45,45,74,0.3)] cursor-pointer hover:bg-[#20202C] transition-colors group">
         <div className="bg-[#2D2D4A] p-2 rounded-full">
-          <Clock className="w-4 h-4 text-[#8BA4F9]" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#8BA4F9]"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <div className="flex flex-col">
           <span className="text-xs font-semibold text-zinc-300">Next Class in 18 min</span>
@@ -51,10 +52,7 @@ export function TopNav() {
           </div>
         </div>
 
-        <button className="p-2 rounded-full hover:bg-white/10 transition-colors relative">
-          <Bell className="w-5 h-5 text-zinc-400" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
-        </button>
+        <NotificationPanel />
 
         <button className="w-8 h-8 rounded-full bg-[#3B3B70] flex items-center justify-center text-sm font-bold text-white border border-[#4B4B8A]">
           S

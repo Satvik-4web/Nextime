@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Home, 
   Calendar, 
   CheckSquare, 
-  Timer, 
+  Timer,
   BookOpen, 
   BarChart2, 
-  MoreHorizontal 
+  MoreHorizontal,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,17 +21,51 @@ const navItems = [
   { name: "Timetable", href: "/timetable", icon: Calendar },
   { name: "Tasks", href: "/assignments", icon: CheckSquare },
   { name: "Study", href: "/study", icon: Timer },
+  { name: "Community", href: "/dashboard/community", icon: Users },
   { name: "Notes", href: "/notes", icon: BookOpen },
   { name: "Analytics", href: "/analytics", icon: BarChart2 },
 ];
 
 export function FloatingNav() {
   const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      // If mouse is within the bottom 150px of the screen, show the nav
+      if (window.innerHeight - e.clientY < 150) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    // Hide initially after 2 seconds to show it exists, then auto-hide
+    timeoutId = setTimeout(() => setIsVisible(false), 2000);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   if (pathname === "/") return null; // Hide on landing page
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+    <motion.div 
+      initial={{ y: 0, opacity: 1 }}
+      animate={{ 
+        y: isVisible ? 0 : 100, 
+        opacity: isVisible ? 1 : 0,
+        pointerEvents: isVisible ? 'auto' : 'none'
+      }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100]"
+    >
       <div className="flex items-center gap-1 p-2 rounded-2xl glass shadow-2xl">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -70,6 +106,6 @@ export function FloatingNav() {
           <MoreHorizontal className="w-5 h-5 text-zinc-400 group-hover:text-zinc-200 transition-colors duration-200" />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

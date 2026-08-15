@@ -33,7 +33,7 @@ export function CommunityChatWidget() {
   const { selectedBatch } = useAppStore();
 
   useEffect(() => {
-    // Setup Supabase Realtime Broadcast
+    // 1. Try Supabase Broadcast
     const channel = supabase.channel('study-lounge', {
       config: {
         broadcast: { ack: false },
@@ -46,7 +46,6 @@ export function CommunityChatWidget() {
     channel
       .on('broadcast', { event: 'chat-message' }, ({ payload }) => {
         setMessages(prev => {
-          // Prevent duplicates
           if (prev.find(m => m.id === payload.id)) return prev;
           return [...prev, { ...payload, isSelf: false }];
         });
@@ -56,14 +55,21 @@ export function CommunityChatWidget() {
         const count = Object.keys(state).length;
         setOnlineCount(count > 0 ? count : 1);
       })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track({ online_at: new Date().toISOString() });
-        }
+      .subscribe();
+
+    // 2. Fallback: Browser BroadcastChannel (Syncs across tabs on the same device instantly)
+    const localChannel = new BroadcastChannel('local-study-lounge');
+    localChannel.onmessage = (event) => {
+      const payload = event.data;
+      setMessages(prev => {
+        if (prev.find(m => m.id === payload.id)) return prev;
+        return [...prev, { ...payload, isSelf: false }];
       });
+    };
 
     return () => {
       supabase.removeChannel(channel);
+      localChannel.close();
     };
   }, [selectedBatch]);
 
@@ -87,12 +93,17 @@ export function CommunityChatWidget() {
 
     setMessages(prev => [...prev, newMessage]);
     
-    // Broadcast to others
+    // Broadcast via Supabase
     channelRef.current?.send({
       type: 'broadcast',
       event: 'chat-message',
       payload: { ...newMessage, isSelf: false }
     });
+
+    // Fallback: Broadcast locally via Browser API
+    const localChannel = new BroadcastChannel('local-study-lounge');
+    localChannel.postMessage({ ...newMessage, isSelf: false });
+    localChannel.close();
     
     setInputValue("");
   };

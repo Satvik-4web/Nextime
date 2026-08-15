@@ -8,7 +8,7 @@ import { TimetableDetailPanel } from "./TimetableDetailPanel";
 import { useAppStore } from "@/stores/useAppStore";
 import { ClassType, TimetableEvent } from "@/types/timetable";
 import { cn } from "@/lib/utils";
-import { Filter, Calendar, LayoutGrid, Plus, X, Maximize2, Minimize2, Download, ArrowLeft } from "lucide-react";
+import { Filter, Calendar, LayoutGrid, Plus, X, Maximize2, Minimize2, Download, ArrowLeft, CalendarDays } from "lucide-react";
 import { AddFriendModal } from "@/components/dashboard/AddFriendModal";
 import { ElectivePickerModal } from "@/components/dashboard/ElectivePickerModal";
 import { useTime } from "@/hooks/useTime";
@@ -110,6 +110,8 @@ export function Timetable() {
       setIsDownloading(false);
     }
   };
+
+  const currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
   const timetableContent = (
     <div 

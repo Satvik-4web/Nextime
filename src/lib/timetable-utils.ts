@@ -1,4 +1,4 @@
-import { TimetableEvent } from "@/types/timetable";
+import { getNow } from "@/lib/time";
 
 // Timetable configuration
 export const TIMETABLE_START_HOUR = 8; // 08:00
@@ -27,6 +27,6 @@ export function getEventHeight(startTime: string, endTime: string): number {
 }
 
 export function getCurrentTimeMinutes(): number {
-  const now = new Date();
+  const now = getNow();
   return now.getHours() * 60 + now.getMinutes();
 }

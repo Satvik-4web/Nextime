@@ -23,7 +23,7 @@ export function AttendanceModal({ isOpen, onClose }: Props) {
 
   const calculatePct = (attended: number, total: number) => {
     if (total === 0) return 100;
-    return Math.round((attended / total) * 100);
+    return Number(((attended / total) * 100).toFixed(1));
   };
 
   return (

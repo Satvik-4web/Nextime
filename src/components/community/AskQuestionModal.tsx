@@ -31,7 +31,9 @@ export function AskQuestionModal({ isOpen, onClose, defaultSubject }: Props) {
   
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -40,32 +42,39 @@ export function AskQuestionModal({ isOpen, onClose, defaultSubject }: Props) {
       return;
     }
 
+    setIsSubmitting(true);
     const tagArray = tags.split(",").map(t => t.trim()).filter(t => t.length > 0);
 
-    const questionId = addQuestion({
-      authorId: currentUser.id,
-      authorName: anonymous ? "Anonymous Student" : currentUser.displayName,
-      authorAvatar: anonymous ? undefined : currentUser.avatar,
-      title: title.trim(),
-      body: body.trim(),
-      category,
-      subjectName: subjectName.trim() || undefined,
-      tags: tagArray,
-      anonymous
-    });
+    try {
+      const questionId = await addQuestion({
+        authorId: currentUser.id,
+        authorName: anonymous ? "Anonymous Student" : currentUser.displayName,
+        authorAvatar: anonymous ? undefined : currentUser.avatar,
+        title: title.trim(),
+        body: body.trim(),
+        category,
+        subjectName: subjectName.trim() || undefined,
+        tags: tagArray,
+        anonymous
+      });
 
-    // Reset form
-    setTitle("");
-    setBody("");
-    setCategory("Question");
-    setSubjectName(defaultSubject || "");
-    setTags("");
-    setAnonymous(false);
-    
-    onClose();
-    
-    // Navigate to the new question
-    router.push(`/dashboard/community/${questionId}`);
+      // Reset form
+      setTitle("");
+      setBody("");
+      setCategory("Question");
+      setSubjectName(defaultSubject || "");
+      setTags("");
+      setAnonymous(false);
+      
+      onClose();
+      
+      // Navigate to the new question
+      router.push(`/dashboard/community/${questionId}`);
+    } catch (err) {
+      setError("Failed to post question. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -196,12 +205,22 @@ export function AskQuestionModal({ isOpen, onClose, defaultSubject }: Props) {
                 Cancel
               </button>
               <button
-                form="ask-form"
                 type="submit"
-                className="px-6 py-2.5 bg-purple-500 hover:bg-purple-400 text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-colors shadow-lg shadow-purple-500/20"
+                form="ask-form"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm font-bold rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Send className="w-4 h-4" />
-                Post Question
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Posting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Post Question
+                  </>
+                )}
               </button>
             </div>
           </motion.div>

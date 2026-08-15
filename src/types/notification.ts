@@ -4,7 +4,7 @@ export type NotificationCategory = "CLASS" | "ATTENDANCE" | "ASSIGNMENT" | "STUD
 export interface NotificationAction {
   label: string;
   type: "VIEW_TIMETABLE" | "VIEW_ATTENDANCE" | "VIEW_ASSIGNMENT" | "MARK_PRESENT" | "MARK_ABSENT" | "DISMISS" | "OPEN_LINK";
-  payload?: any;
+  payload?: Record<string, unknown> | string | number | null;
 }
 
 export interface AppNotification {

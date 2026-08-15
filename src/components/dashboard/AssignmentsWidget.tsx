@@ -5,13 +5,14 @@ import { ArrowRight, Circle, Plus } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/stores/useAppStore";
 import { useNotificationStore } from "@/stores/useNotificationStore";
+import { getNowMs } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { AddAssignmentModal } from "./AddAssignmentModal";
 
 export function AssignmentsWidget() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { assignments, toggleAssignment } = useAppStore();
+  const { selectedBatch, timetables, assignments, toggleAssignment } = useAppStore();
   const { addToast } = useNotificationStore();
   
   const handleToggle = (assignment: any) => {
@@ -26,12 +27,27 @@ export function AssignmentsWidget() {
     }
   };
   
-  const pendingAssignments = assignments
+  // Filter assignments by active batch context
+  const batchEvents = (selectedBatch && timetables[selectedBatch]) ? timetables[selectedBatch] : [];
+  const validContexts = new Set(batchEvents.map(e => e.subject.toLowerCase()));
+  batchEvents.forEach(e => {
+    if (e.code) validContexts.add(e.code.toLowerCase());
+    if (e.room) validContexts.add(e.room.toLowerCase());
+  });
+
+  // If no batch is selected, show all assignments? Or show none? The prompt says:
+  // "global assignments remain only if they belong to that student context."
+  // So if there's a batch, we filter.
+  const contextAssignments = selectedBatch 
+    ? assignments.filter(a => validContexts.has(a.courseCode.toLowerCase()) || validContexts.has(a.title.toLowerCase()))
+    : assignments;
+
+  const pendingAssignments = contextAssignments
     .filter(a => !a.completed)
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
     .slice(0, 3); // Show top 3 pending
 
-  const dueSoonCount = assignments.filter(a => !a.completed && (new Date(a.dueDate).getTime() - Date.now()) < 86400000 * 3).length;
+  const dueSoonCount = contextAssignments.filter(a => !a.completed && (new Date(a.dueDate).getTime() - getNowMs()) < 86400000 * 3).length;
   return (
     <div className="bg-[#0A0A0C] border border-white/5 rounded-2xl p-5 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex flex-col h-[200px] group hover:border-white/10 transition-colors">
       <div className="flex justify-between items-center mb-4">

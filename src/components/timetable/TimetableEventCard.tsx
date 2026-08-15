@@ -19,9 +19,9 @@ export function TimetableEventCard({ event, isCurrent, onClick, isElective, isUn
 
   // Cinematic Styling based on type
   const typeStyles = {
-    lecture: "bg-[#0A0E17]/80 hover:bg-[#0D1424]/90 border border-blue-500/20 hover:border-blue-400/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)]",
-    lab: "bg-[#071317]/80 hover:bg-[#0A1A24]/90 border border-cyan-500/20 hover:border-cyan-400/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)]",
-    tutorial: "bg-[#130A17]/80 hover:bg-[#1A0D24]/90 border border-purple-500/20 hover:border-purple-400/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)]",
+    lecture: "bg-[#0A0E17]/80 hover:bg-[#0D1424]/90 border border-blue-500/20 hover:border-blue-400/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)]",
+    lab: "bg-[#071317]/80 hover:bg-[#0A1A24]/90 border border-cyan-500/20 hover:border-cyan-400/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:shadow-[0_8px_30px_rgba(6,182,212,0.15)]",
+    tutorial: "bg-[#130A17]/80 hover:bg-[#1A0D24]/90 border border-purple-500/20 hover:border-purple-400/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:shadow-[0_8px_30px_rgba(168,85,247,0.15)]",
   };
 
   const glowStyles = {
@@ -34,7 +34,7 @@ export function TimetableEventCard({ event, isCurrent, onClick, isElective, isUn
     return (
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 10 }}
-        whileHover={{ scale: 1.03, zIndex: 30 }}
+        whileHover={{ scale: 1.02, y: -2, zIndex: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.4, type: "spring", stiffness: 400, damping: 25 }}
         className="absolute w-[calc(100%-12px)] mx-[6px] rounded-2xl p-3 cursor-pointer transition-all overflow-hidden group bg-[#0A0A0C]/50 border-2 border-dashed border-purple-500/40 hover:border-purple-400/80 hover:bg-purple-500/10 shadow-[0_0_15px_rgba(168,85,247,0.1)] flex flex-col justify-center items-center backdrop-blur-md"
@@ -55,7 +55,7 @@ export function TimetableEventCard({ event, isCurrent, onClick, isElective, isUn
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.9, y: 10 }}
-      whileHover={{ scale: 1.03, zIndex: 30 }}
+      whileHover={{ scale: 1.02, y: -2, zIndex: 30 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.4, type: "spring", stiffness: 400, damping: 25 }}
       className={cn(

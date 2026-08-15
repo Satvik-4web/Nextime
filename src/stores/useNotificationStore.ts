@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AppNotification } from "@/types/notification";
+import { getNowMs } from "@/lib/time";
 
 export interface NotificationSettings {
   classReminders: boolean;
@@ -87,12 +88,12 @@ export const useNotificationStore = create<NotificationState>()(
       },
       
       addToast: (toastData) => {
-        const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const id = `toast-${getNowMs()}-${Math.random().toString(36).substring(2, 9)}`;
         const fullToast: AppNotification = {
           ...toastData,
           id,
           read: true,
-          timestamp: Date.now()
+          timestamp: getNowMs()
         };
         
         set((state) => ({

@@ -15,19 +15,13 @@ import { useTime } from "@/hooks/useTime";
 import { getCurrentClass, getNextClass, parseTime } from "@/lib/timetableUtils";
 
 export function Timetable() {
-  const { selectedBatch, timetables, isLoaded, pinnedBatches, unpinBatch, customEvents } = useAppStore();
+  const { selectedBatch, timetables, isLoaded, customEvents } = useAppStore();
   const [viewMode, setViewMode] = useState<"today" | "week">("week");
-  const [activeBatch, setActiveBatch] = useState<string | null>(selectedBatch);
-  const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isCustomizeMode, setIsCustomizeMode] = useState(false);
   const timetableRef = useRef<HTMLDivElement>(null);
   const now = useTime(1000);
-
-  useEffect(() => {
-    setActiveBatch(selectedBatch);
-  }, [selectedBatch]);
 
   const [filters, setFilters] = useState<Record<ClassType, boolean>>({
     lecture: true,
@@ -41,7 +35,7 @@ export function Timetable() {
     setFilters(prev => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const currentBatchEvents = (activeBatch && timetables[activeBatch]) ? timetables[activeBatch] : [];
+  const currentBatchEvents = (selectedBatch && timetables[selectedBatch]) ? timetables[selectedBatch] : [];
   
   // Merge custom events
   const mergedEvents = currentBatchEvents.map(event => {
@@ -99,7 +93,7 @@ export function Timetable() {
       setIsDownloading(false);
 
       const link = document.createElement('a');
-      link.download = `Timetable-${activeBatch || 'MyBatch'}.png`;
+      link.download = `Timetable-${selectedBatch || 'MyBatch'}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -114,7 +108,7 @@ export function Timetable() {
       className={cn(
         "flex flex-col gap-4 transition-all duration-500",
         isFullscreen && !isDownloading
-          ? "fixed inset-0 z-[1000] bg-[#050505] p-4 md:p-8 overflow-y-auto" 
+          ? "fixed inset-0 z-[1000] bg-[#050505] p-4 md:p-8 overflow-y-auto custom-scrollbar" 
           : "",
         isDownloading ? "fixed top-0 left-0 z-[9999] w-[1200px] h-auto p-8 bg-[#050505] rounded-none border-none shadow-none" : ""
       )}
@@ -133,26 +127,7 @@ export function Timetable() {
           )}
           <h2 className="text-xl font-bold">Timetable</h2>
           
-          {/* Stushark Tabs */}
-          <div className="flex items-center gap-1 bg-[#121214] p-1 rounded-full border border-white/5">
-            <button 
-              onClick={() => setActiveBatch(selectedBatch)}
-              className={cn("px-3 py-1 rounded-full text-xs font-bold transition-all", activeBatch === selectedBatch ? "bg-primary text-white" : "text-zinc-500 hover:text-zinc-300")}
-            >
-              My Batch
-            </button>
-            {pinnedBatches.map(batch => (
-              <div key={batch} className={cn("flex items-center gap-1 pl-3 pr-1 py-1 rounded-full text-xs font-bold transition-all group", activeBatch === batch ? "bg-white/10 text-white" : "text-zinc-500 hover:text-zinc-300")}>
-                <button onClick={() => setActiveBatch(batch)}>{batch}</button>
-                <button onClick={() => { unpinBatch(batch); if(activeBatch===batch) setActiveBatch(selectedBatch); }} className="p-0.5 rounded-full hover:bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-            <button onClick={() => setIsAddFriendOpen(true)} className="w-6 h-6 rounded-full flex items-center justify-center border border-dashed border-zinc-600 text-zinc-500 hover:text-white hover:border-white transition-all ml-1">
-              <Plus className="w-3 h-3" />
-            </button>
-          </div>
+
         </div>
         
         {/* Filters */}
@@ -259,13 +234,11 @@ export function Timetable() {
         />
       )}
 
-      <ElectivePickerModal
-        event={pickingElectiveEvent}
-        isOpen={!!pickingElectiveEvent}
-        onClose={() => setPickingElectiveEvent(null)}
+      <ElectivePickerModal 
+        isOpen={!!pickingElectiveEvent} 
+        onClose={() => setPickingElectiveEvent(null)} 
+        event={pickingElectiveEvent} 
       />
-
-      <AddFriendModal isOpen={isAddFriendOpen} onClose={() => setIsAddFriendOpen(false)} />
     </div>
   );
 

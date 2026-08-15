@@ -19,18 +19,20 @@ export function TimetableDetailPanel({ event, onClose }: Props) {
   const [editSubject, setEditSubject] = useState("");
   const [editRoom, setEditRoom] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [prevEventId, setPrevEventId] = useState<string | null>(null);
+
+  if (event && event.id !== prevEventId) {
+    setPrevEventId(event.id);
+    setEditSubject(event.subject);
+    setEditRoom(event.room);
+    setIsEditing(false);
+  }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (event) {
-      setEditSubject(event.subject);
-      setEditRoom(event.room);
-      setIsEditing(false);
-    }
-  }, [event]);
 
   const handleSave = () => {
     if (event) {

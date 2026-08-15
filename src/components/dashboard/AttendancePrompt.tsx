@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/stores/useAppStore";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { timeStringToMinutes, getCurrentTimeMinutes } from "@/lib/timetable-utils";
+import { getNow } from "@/lib/time";
 import { TimetableEvent, DayOfWeek } from "@/types/timetable";
 import { Check, X, AlertCircle } from "lucide-react";
 
@@ -30,7 +31,7 @@ export function AttendancePrompt() {
   const checkClasses = () => {
     if (!selectedBatch || !timetables[selectedBatch] || activePrompt) return;
 
-    const now = new Date();
+    const now = getNow();
     const currentDayStr = DAYS[now.getDay()];
     const todayDateStr = now.toISOString().split("T")[0]; // YYYY-MM-DD
     const currentMins = getCurrentTimeMinutes();

@@ -1,3 +1,5 @@
+"use client";
+
 import { TopNav } from "@/components/dashboard/TopNav";
 import { AttendanceWidget } from "@/components/dashboard/AttendanceWidget";
 import { CgpaWidget } from "@/components/dashboard/CgpaWidget";
@@ -9,8 +11,22 @@ import { CommunityHighlightsWidget } from "@/components/dashboard/CommunityHighl
 import { Timetable } from "@/components/timetable/Timetable";
 import { BootTransition } from "@/components/dashboard/BootTransition";
 import { BootWidget } from "@/components/dashboard/BootWidget";
+import { useAppStore } from "@/stores/useAppStore";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
+  const { selectedBatch } = useAppStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!selectedBatch) {
+      router.replace("/?setup=true");
+    }
+  }, [selectedBatch, router]);
+
+  if (!selectedBatch) return null;
+
   return (
     <BootTransition>
       <div className="flex flex-col min-h-screen w-full bg-[#050505]">

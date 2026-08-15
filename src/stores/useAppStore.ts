@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { TimetableEvent } from "@/types/timetable";
+import { getNow, getNowMs } from "@/lib/time";
 
 export interface Assignment {
   id: string;
@@ -40,6 +41,7 @@ interface AppState {
   bootPhase: number;
   setBootPhase: (phase: number) => void;
   completeBoot: () => void;
+  resetBoot: () => void;
   
   setSelectedBatch: (batch: string) => void;
   loadTimetables: () => Promise<void>;
@@ -77,8 +79,8 @@ export const useAppStore = create<AppState>()(
       cgpaData: {},
       promptedClasses: {},
       assignments: [
-        { id: "1", title: "Submit Lab Report 3", courseCode: "UCS668P", dueDate: new Date(Date.now() + 86400000 * 2).toISOString(), priority: "high", completed: false },
-        { id: "2", title: "Read Chapter 4", courseCode: "UCS50P", dueDate: new Date(Date.now() + 86400000 * 5).toISOString(), priority: "medium", completed: false }
+        { id: "1", title: "Submit Lab Report 3", courseCode: "UCS668P", dueDate: new Date(getNowMs() + 86400000 * 2).toISOString(), priority: "high", completed: false },
+        { id: "2", title: "Read Chapter 4", courseCode: "UCS50P", dueDate: new Date(getNowMs() + 86400000 * 5).toISOString(), priority: "medium", completed: false }
       ],
 
       timerMode: 'focus',
@@ -91,6 +93,7 @@ export const useAppStore = create<AppState>()(
 
       setBootPhase: (phase) => set({ bootPhase: phase }),
       completeBoot: () => set({ hasCompletedBoot: true, bootPhase: 8 }),
+      resetBoot: () => set({ hasCompletedBoot: false, bootPhase: 0 }),
 
       setSelectedBatch: (batch) => {
         set({ selectedBatch: batch });

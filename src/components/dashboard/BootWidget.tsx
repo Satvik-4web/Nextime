@@ -36,12 +36,10 @@ export function BootWidget({ children, direction, delayOffset = 0 }: Props) {
   const initialTransform = getInitialOffset();
 
   // Determine animation state based on global phase
-  // Phase 1-2: Hidden
-  // Phase 3: Floating (Materialize)
-  // Phase 4+: Locked (Assembly)
+  // Phase 1-5: Hidden (handled by parent opacity, but we keep them translated here)
+  // Phase 6+: Locked (Assembly into final dashboard)
   let animationState = "hidden";
-  if (bootPhase === 3) animationState = "floating";
-  if (bootPhase >= 4) animationState = "locked";
+  if (bootPhase >= 6) animationState = "locked";
 
   const variants = {
     hidden: {

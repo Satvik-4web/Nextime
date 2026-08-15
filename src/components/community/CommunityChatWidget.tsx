@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Users, Sparkles, MessageCircle, X } from "lucide-react";
+import { getNowMs } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,9 +15,9 @@ interface ChatMessage {
 }
 
 const INITIAL_MESSAGES: ChatMessage[] = [
-  { id: "1", author: "Alex", text: "Anyone working on the OS assignment tonight?", timestamp: Date.now() - 1000 * 60 * 15 },
-  { id: "2", author: "Sarah", text: "Yeah, stuck on question 3.", timestamp: Date.now() - 1000 * 60 * 10 },
-  { id: "3", author: "Mike", text: "Make sure you check the lecture slides from Tuesday!", timestamp: Date.now() - 1000 * 60 * 5 },
+  { id: "1", author: "Alex", text: "Anyone working on the OS assignment tonight?", timestamp: getNowMs() - 1000 * 60 * 15 },
+  { id: "2", author: "Sarah", text: "Yeah, stuck on question 3.", timestamp: getNowMs() - 1000 * 60 * 10 },
+  { id: "3", author: "Mike", text: "Make sure you check the lecture slides from Tuesday!", timestamp: getNowMs() - 1000 * 60 * 5 },
 ];
 
 export function CommunityChatWidget() {
@@ -38,10 +39,10 @@ export function CommunityChatWidget() {
     setMessages(prev => [
       ...prev,
       {
-        id: Date.now().toString(),
+        id: getNowMs().toString(),
         author: "You",
         text: inputValue.trim(),
-        timestamp: Date.now(),
+        timestamp: getNowMs(),
         isSelf: true
       }
     ]);

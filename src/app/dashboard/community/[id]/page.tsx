@@ -14,12 +14,13 @@ import { CommunityReply } from "@/types/community";
 export default function QuestionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const { questions, replies, currentUser, addReply, upvoteQuestion, upvoteReply, acceptReply } = useCommunityStore();
+  const { questions, replies, currentUser, addReply, upvoteQuestion, upvoteReply, acceptReply, isLive } = useCommunityStore();
   
   const question = questions.find(q => q.id === id);
   const questionReplies = replies[id] || [];
 
   const [replyBody, setReplyBody] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!question) {
     return (
@@ -30,17 +31,23 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
     );
   }
 
-  const handleReplySubmit = () => {
+  const handleReplySubmit = async () => {
     if (!replyBody.trim()) return;
     
-    addReply(id, {
-      authorId: currentUser.id,
-      authorName: currentUser.displayName,
-      authorAvatar: currentUser.avatar,
-      body: replyBody.trim(),
-    });
-    
-    setReplyBody("");
+    setIsSubmitting(true);
+    try {
+      await addReply(id, {
+        authorId: currentUser.id,
+        authorName: currentUser.displayName,
+        authorAvatar: currentUser.avatar,
+        body: replyBody.trim(),
+      });
+      setReplyBody("");
+    } catch (err) {
+      console.error("Failed to post reply:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Sort replies: accepted first, then by votes, then by date
@@ -60,13 +67,26 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
           <div className="max-w-[900px] w-full mx-auto flex flex-col gap-6">
             
             <BootWidget direction="top" delayOffset={0}>
-              <button 
-                onClick={() => router.back()}
-                className="flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-zinc-300 w-fit transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
+              <div className="flex justify-between items-center w-full">
+                <button 
+                  onClick={() => router.back()}
+                  className="flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+                {isLive ? (
+                  <span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    LIVE
+                  </span>
+                ) : (
+                  <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    OFFLINE DEMO
+                  </span>
+                )}
+              </div>
             </BootWidget>
 
             {/* Question Details */}
@@ -177,11 +197,20 @@ export default function QuestionDetailPage({ params }: { params: Promise<{ id: s
                     <div className="flex justify-end">
                       <button
                         onClick={handleReplySubmit}
-                        disabled={!replyBody.trim()}
-                        className="px-6 py-2.5 bg-purple-500 hover:bg-purple-400 disabled:opacity-50 disabled:hover:bg-purple-500 text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-colors shadow-lg shadow-purple-500/20"
+                        disabled={!replyBody.trim() || isSubmitting}
+                        className="px-6 py-2.5 bg-purple-500 hover:bg-purple-400 disabled:opacity-50 disabled:hover:bg-purple-500 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-colors shadow-lg shadow-purple-500/20"
                       >
-                        <Send className="w-4 h-4" />
-                        Post Answer
+                        {isSubmitting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Posting...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4" />
+                            Post Answer
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>

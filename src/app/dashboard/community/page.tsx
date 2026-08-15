@@ -12,12 +12,19 @@ import Link from "next/link";
 import { AskQuestionModal } from "@/components/community/AskQuestionModal";
 import { CommunityChatWidget } from "@/components/community/CommunityChatWidget";
 
+import { useEffect } from "react";
+import { getNowMs } from "@/lib/time";
+
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState<"Recent" | "Unanswered">("Recent");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   
-  const { questions } = useCommunityStore();
+  const { questions, isLive, fetchCommunityData } = useCommunityStore();
+
+  useEffect(() => {
+    fetchCommunityData();
+  }, [fetchCommunityData]);
 
   const filteredQuestions = questions.filter(q => {
     if (activeTab === "Unanswered" && q.replyCount > 0) return false;
@@ -41,15 +48,26 @@ export default function CommunityPage() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[100px] pointer-events-none rounded-full" />
                 
                 <div>
-                  <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-                    <Users className="w-8 h-8 text-purple-400" />
-                    COMMUNITY
+                  <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight uppercase flex items-center gap-3">
+                    <Users className="w-8 h-8 text-purple-500" />
+                    Community
                   </h1>
-                  <p className="text-zinc-400 mt-2 font-medium">Learn together. Ask questions, share resources, and help others.</p>
-                </div>
-
-                <div className="px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-500 text-sm font-bold">
-                  Community feature is currently offline for scheduled maintenance.
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="text-zinc-500 font-medium uppercase tracking-widest text-[10px]">
+                      Global Forum
+                    </p>
+                    {isLive ? (
+                      <span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        LIVE
+                      </span>
+                    ) : (
+                      <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        OFFLINE DEMO
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </BootWidget>
@@ -195,7 +213,7 @@ function QuestionCard({ question }: { question: CommunityQuestion }) {
 }
 
 function getTimeAgo(timestamp: number): string {
-  const diff = Date.now() - timestamp;
+  const diff = getNowMs() - timestamp;
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins} min ago`;
   const hours = Math.floor(mins / 60);

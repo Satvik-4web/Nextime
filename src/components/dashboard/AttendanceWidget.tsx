@@ -23,7 +23,7 @@ export function AttendanceWidget() {
     }
   });
 
-  const overallPct = totalHeld > 0 ? Math.round((totalAttended / totalHeld) * 100) : 100;
+  const overallPct = totalHeld > 0 ? Number(((totalAttended / totalHeld) * 100).toFixed(1)) : 100;
   
   // Calculate SVG stroke offset for the circle
   // Circle circumference is ~339.29 (2 * pi * r where r=54)

@@ -1,23 +1,27 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { CommunityQuestion, CommunityReply, CommunityUser } from "@/types/community";
+import { getNowMs } from "@/lib/time";
 
 interface CommunityState {
   currentUser: CommunityUser;
   questions: CommunityQuestion[];
   replies: Record<string, CommunityReply[]>; // Map of questionId -> Replies
+  isLive: boolean;
   
   // Actions
-  addQuestion: (question: Omit<CommunityQuestion, "id" | "createdAt" | "updatedAt" | "replyCount" | "upvotes">) => string;
-  addReply: (questionId: string, reply: Omit<CommunityReply, "id" | "createdAt" | "questionId" | "accepted" | "votes">) => void;
+  fetchCommunityData: () => Promise<void>;
+  addQuestion: (question: Omit<CommunityQuestion, "id" | "createdAt" | "updatedAt" | "replyCount" | "upvotes">) => Promise<string>;
+  addReply: (questionId: string, reply: Omit<CommunityReply, "id" | "createdAt" | "questionId" | "accepted" | "votes">) => Promise<void>;
   upvoteQuestion: (questionId: string) => void;
   upvoteReply: (questionId: string, replyId: string) => void;
   acceptReply: (questionId: string, replyId: string) => void;
+  updateUser: (updates: Partial<CommunityUser>) => void;
 }
 
 const CURRENT_USER: CommunityUser = {
   id: "user-1",
-  displayName: "Satvik",
+  displayName: "Unknown",
   avatar: "",
   program: "Computer Science Engineering",
   helpfulPoints: 284,
@@ -37,8 +41,8 @@ const INITIAL_QUESTIONS: CommunityQuestion[] = [
     category: "Concept",
     tags: ["Algorithms", "Two Pointers"],
     anonymous: false,
-    createdAt: Date.now() - 1000 * 60 * 2, // 2 mins ago
-    updatedAt: Date.now(),
+    createdAt: getNowMs() - 1000 * 60 * 2, // 2 mins ago
+    updatedAt: getNowMs(),
     replyCount: 4,
     upvotes: 12
   },
@@ -52,8 +56,8 @@ const INITIAL_QUESTIONS: CommunityQuestion[] = [
     category: "Assignment Help",
     tags: ["Page Replacement", "Assignment 4"],
     anonymous: true,
-    createdAt: Date.now() - 1000 * 60 * 60 * 3, // 3 hours ago
-    updatedAt: Date.now(),
+    createdAt: getNowMs() - 1000 * 60 * 60 * 3, // 3 hours ago
+    updatedAt: getNowMs(),
     replyCount: 6,
     upvotes: 8
   },
@@ -67,8 +71,8 @@ const INITIAL_QUESTIONS: CommunityQuestion[] = [
     category: "Programming",
     tags: ["C++", "Iterators", "Vectors"],
     anonymous: false,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
-    updatedAt: Date.now(),
+    createdAt: getNowMs() - 1000 * 60 * 60 * 24, // 1 day ago
+    updatedAt: getNowMs(),
     replyCount: 12,
     acceptedAnswerId: "r-1",
     upvotes: 24
@@ -81,50 +85,105 @@ export const useCommunityStore = create<CommunityState>()(
       currentUser: CURRENT_USER,
       questions: INITIAL_QUESTIONS,
       replies: {},
+      isLive: false,
 
-      addQuestion: (questionData) => {
-        const id = `q-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        const newQuestion: CommunityQuestion = {
+      fetchCommunityData: async () => {
+        try {
+          const res = await fetch('/api/community');
+          if (!res.ok) throw new Error('API offline');
+          const data = await res.json();
+          if (data && Array.isArray(data)) {
+            // Success: connected to real backend
+            set({ questions: data, isLive: true });
+          }
+        } catch (error) {
+          // Fallback to local mode
+          console.warn('Community API offline. Falling back to Local Demo Mode.');
+          set({ isLive: false });
+        }
+      },
+
+      addQuestion: async (questionData) => {
+        const fallbackId = `q-${getNowMs()}-${Math.random().toString(36).substring(2, 9)}`;
+        const localQuestion: CommunityQuestion = {
           ...questionData,
-          id,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          id: fallbackId,
+          createdAt: getNowMs(),
+          updatedAt: getNowMs(),
           replyCount: 0,
           upvotes: 0
         };
-        
-        set((state) => ({
-          questions: [newQuestion, ...state.questions]
-        }));
-        
-        return id;
+
+        try {
+          const res = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(localQuestion)
+          });
+          if (!res.ok) throw new Error('API offline');
+          
+          const dbQuestion = await res.json();
+          set((state) => ({
+            questions: [dbQuestion, ...state.questions],
+            isLive: true
+          }));
+          return dbQuestion.id;
+        } catch (error) {
+          // Fallback to local mutation
+          set((state) => ({
+            questions: [localQuestion, ...state.questions],
+            isLive: false
+          }));
+          return fallbackId;
+        }
       },
 
-      addReply: (questionId, replyData) => {
-        const id = `r-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        const newReply: CommunityReply = {
+      addReply: async (questionId, replyData) => {
+        const fallbackId = `r-${getNowMs()}-${Math.random().toString(36).substring(2, 9)}`;
+        const localReply: CommunityReply = {
           ...replyData,
-          id,
+          id: fallbackId,
           questionId,
           accepted: false,
           votes: 0,
-          createdAt: Date.now()
+          createdAt: getNowMs()
         };
-        
-        set((state) => {
-          const currentReplies = state.replies[questionId] || [];
-          return {
-            replies: {
-              ...state.replies,
-              [questionId]: [...currentReplies, newReply]
-            },
-            questions: state.questions.map(q => 
-              q.id === questionId 
-                ? { ...q, replyCount: q.replyCount + 1, updatedAt: Date.now() } 
-                : q
-            )
-          };
-        });
+
+        try {
+          const res = await fetch('/api/community/replies', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(localReply)
+          });
+          if (!res.ok) throw new Error('API offline');
+
+          const dbReply = await res.json();
+          set((state) => {
+            const currentReplies = state.replies[questionId] || [];
+            return {
+              replies: { ...state.replies, [questionId]: [...currentReplies, dbReply] },
+              questions: state.questions.map(q => q.id === questionId ? { ...q, replyCount: q.replyCount + 1, updatedAt: getNowMs() } : q),
+              isLive: true
+            };
+          });
+        } catch (error) {
+          // Fallback to local mutation
+          set((state) => {
+            const currentReplies = state.replies[questionId] || [];
+            return {
+              replies: {
+                ...state.replies,
+                [questionId]: [...currentReplies, localReply]
+              },
+              questions: state.questions.map(q => 
+                q.id === questionId 
+                  ? { ...q, replyCount: q.replyCount + 1, updatedAt: getNowMs() } 
+                  : q
+              ),
+              isLive: false
+            };
+          });
+        }
       },
 
       upvoteQuestion: (questionId) => {
@@ -158,11 +217,16 @@ export const useCommunityStore = create<CommunityState>()(
             )
           }
         }));
-      }
+      },
+
+      updateUser: (updates) => set((state) => ({
+        currentUser: { ...state.currentUser, ...updates }
+      }))
     }),
     {
       name: "nextime-community",
       partialize: (state) => ({
+        currentUser: state.currentUser,
         questions: state.questions,
         replies: state.replies
       }),

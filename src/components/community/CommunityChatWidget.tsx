@@ -2,12 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Users, Sparkles, MessageCircle, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAppStore } from "@/stores/useAppStore";
 import { getNowMs } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/lib/supabase";
-import { useAppStore } from "@/stores/useAppStore";
-import { RealtimeChannel } from "@supabase/supabase-js";
 
 interface ChatMessage {
   id: string;
@@ -29,33 +27,38 @@ export function CommunityChatWidget() {
   const [inputValue, setInputValue] = useState("");
   const [onlineCount, setOnlineCount] = useState(1);
   const endRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<RealtimeChannel | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
   const { selectedBatch } = useAppStore();
 
   useEffect(() => {
-    // 1. Try Supabase Broadcast
-    const channel = supabase.channel('study-lounge', {
-      config: {
-        broadcast: { ack: false },
-        presence: { key: selectedBatch || 'Anon' }
+    // 1. Global Public WebSocket (No Vercel/Supabase auth required)
+    // Using a public pieSocket testing cluster for instant multiplayer
+    const ws = new WebSocket('wss://free.blr2.piesocket.com/v3/1?api_key=vdjYhwZA81tcD9nkO11NDxAn0lVcdpQ9r2iT9m3n');
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      // Announce presence
+      ws.send(JSON.stringify({ app: 'nextime-chat', type: 'join' }));
+      setOnlineCount(prev => prev + 1); // Optimistic UI
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.app !== 'nextime-chat') return;
+
+        if (payload.type === 'chat-message') {
+          setMessages(prev => {
+            if (prev.find(m => m.id === payload.data.id)) return prev;
+            return [...prev, { ...payload.data, isSelf: false }];
+          });
+        } else if (payload.type === 'join') {
+          setOnlineCount(prev => prev < 12 ? prev + 1 : prev);
+        }
+      } catch (e) {
+        // ignore non-json
       }
-    });
-
-    channelRef.current = channel;
-
-    channel
-      .on('broadcast', { event: 'chat-message' }, ({ payload }) => {
-        setMessages(prev => {
-          if (prev.find(m => m.id === payload.id)) return prev;
-          return [...prev, { ...payload, isSelf: false }];
-        });
-      })
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        const count = Object.keys(state).length;
-        setOnlineCount(count > 0 ? count : 1);
-      })
-      .subscribe();
+    };
 
     // 2. Fallback: Browser BroadcastChannel (Syncs across tabs on the same device instantly)
     const localChannel = new BroadcastChannel('local-study-lounge');
@@ -68,7 +71,9 @@ export function CommunityChatWidget() {
     };
 
     return () => {
-      supabase.removeChannel(channel);
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
       localChannel.close();
     };
   }, [selectedBatch]);
@@ -93,12 +98,14 @@ export function CommunityChatWidget() {
 
     setMessages(prev => [...prev, newMessage]);
     
-    // Broadcast via Supabase
-    channelRef.current?.send({
-      type: 'broadcast',
-      event: 'chat-message',
-      payload: { ...newMessage, isSelf: false }
-    });
+    // Broadcast globally via WebSocket
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        app: 'nextime-chat',
+        type: 'chat-message',
+        data: { ...newMessage, isSelf: false }
+      }));
+    }
 
     // Fallback: Broadcast locally via Browser API
     const localChannel = new BroadcastChannel('local-study-lounge');

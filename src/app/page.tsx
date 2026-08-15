@@ -13,13 +13,12 @@ import { Footer } from "@/components/navigation/Footer";
 
 export default function LandingPage() {
   const router = useRouter();
-  // Phase -1: Awaiting User Gesture (for Audio Autoplay)
   // Phase 0: Abstract intro graphics (Wait 2.5s)
   // Phase 1: Logo & Tagline (Wait for click)
   // Phase 2: Setup - Select Year
   // Phase 3: Setup - Select Batch
   // Phase 4: Launching OS (Warp speed)
-  const [phase, setPhase] = useState(-1);
+  const [phase, setPhase] = useState(0);
   
   const { allBatches, loadTimetables, setSelectedBatch, selectedBatch } = useAppStore();
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
@@ -40,15 +39,12 @@ export default function LandingPage() {
       setPhase(2);
       return;
     }
-  }, []);
 
-  const handleInitializeOS = () => {
-    playFuturisticSound('boot');
-    setPhase(0);
-    setTimeout(() => {
+    const t1 = setTimeout(() => {
       setPhase(1);
     }, 2500); 
-  };
+    return () => clearTimeout(t1);
+  }, []);
 
   const handleExploreClick = () => {
     playFuturisticSound('click');
@@ -113,30 +109,6 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_10%,transparent_100%)]" />
         </div>
 
-      {/* Initialization Screen (Phase -1) */}
-      <AnimatePresence>
-        {phase === -1 && (
-          <motion.div 
-            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md cursor-pointer"
-            onClick={handleInitializeOS}
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-            <motion.div 
-              className="text-center flex flex-col items-center gap-4"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="w-12 h-12 rounded-full border border-blue-500/50 flex items-center justify-center animate-ping">
-                <div className="w-4 h-4 rounded-full bg-blue-500" />
-              </div>
-              <p className="text-blue-400 font-mono tracking-[0.3em] text-sm font-bold uppercase">Click anywhere to initialize OS</p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Navbar (Appears in Phase 1) */}
       <AnimatePresence>
         {(phase === 1 || phase === 2 || phase === 3) && (
@@ -183,7 +155,7 @@ export default function LandingPage() {
 
       {/* Abstract Intro Graphics ("JS Graphics") - Only show in phase 0/1 */}
       <AnimatePresence>
-        {phase >= 0 && phase < 2 && (
+        {phase < 2 && (
           <motion.div 
             className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden"
             exit={{ opacity: 0, scale: 1.1, filter: "blur(20px)" }}

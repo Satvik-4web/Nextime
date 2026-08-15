@@ -83,10 +83,27 @@ export default function LandingPage() {
     <div className="relative min-h-[100dvh] bg-[#020202] overflow-x-hidden font-sans text-white selection:bg-blue-500/30 flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center relative min-h-screen w-full">
         
-        {/* Background Ambience */}
+        {/* Ultra-Premium Background Ambience */}
         <div className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-1000" style={{ opacity: phase >= 2 ? 0.3 : 1 }}>
-          <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[80vw] h-[80vw] max-w-[1000px] max-h-[1000px] bg-blue-500/5 blur-[120px] rounded-full mix-blend-screen" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+          {/* Animated Glowing Orbs */}
+          <motion.div 
+            className="absolute top-[10%] left-[20%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-purple-600/10 blur-[150px] rounded-full mix-blend-screen"
+            animate={{ x: [0, 100, 0], y: [0, -50, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div 
+            className="absolute bottom-[10%] right-[10%] w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] bg-blue-600/10 blur-[150px] rounded-full mix-blend-screen"
+            animate={{ x: [0, -80, 0], y: [0, 50, 0], scale: [1, 1.2, 1] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          />
+          <motion.div 
+            className="absolute top-[40%] left-[40%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] bg-emerald-500/10 blur-[120px] rounded-full mix-blend-screen"
+            animate={{ x: [0, 50, -50, 0], y: [0, 50, -50, 0] }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          />
+          
+          {/* Futuristic Infinite Grid */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_10%,transparent_100%)]" />
         </div>
 
       {/* Navbar (Appears in Phase 1) */}
@@ -157,7 +174,7 @@ export default function LandingPage() {
               animate={phase === 0 ? { opacity: 1, scale: 1, filter: "blur(0px)", x: 300, y: 40 } : { opacity: 0, scale: 1.1, filter: "blur(20px)", x: 400, y: -50 }}
               transition={{ duration: phase === 0 ? 1.5 : 0.4, ease: "easeOut" }}
             >
-              <div className="relative w-[500px] h-[300px] border border-white/10 rounded-2xl bg-gradient-to-br from-white/[0.02] to-transparent p-6 shadow-[0_0_50px_rgba(37,99,235,0.1)] overflow-hidden">
+              <div className="relative w-[500px] h-[300px] border border-blue-500/30 rounded-2xl bg-gradient-to-br from-blue-900/10 to-transparent p-6 shadow-[0_0_80px_rgba(37,99,235,0.2)] overflow-hidden backdrop-blur-xl">
                 <motion.div 
                   className="absolute top-4 left-4 text-[9px] font-mono tracking-widest text-blue-400 uppercase flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded backdrop-blur-md"
                   initial={{ opacity: 0, x: -20 }}
@@ -246,7 +263,7 @@ export default function LandingPage() {
                 </svg>
                 
                 <motion.div 
-                  className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 shadow-[0_0_30px_rgba(34,197,94,0.2)] flex items-center justify-center backdrop-blur-md"
+                  className="w-20 h-20 rounded-full bg-green-500/20 border border-green-400/50 shadow-[0_0_50px_rgba(34,197,94,0.4)] flex items-center justify-center backdrop-blur-xl"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.8, delay: 0.8, type: "spring" }}
@@ -263,7 +280,7 @@ export default function LandingPage() {
               animate={phase === 0 ? { opacity: 1, scale: 1, filter: "blur(0px)", x: -250, y: 180 } : { opacity: 0, scale: 0.9, filter: "blur(20px)", x: -350, y: 250 }}
               transition={{ duration: phase === 0 ? 1.5 : 0.4, ease: "easeOut" }}
             >
-              <div className="relative w-[240px] border border-orange-500/20 bg-orange-500/5 rounded-xl p-4 backdrop-blur-sm shadow-[0_0_30px_rgba(249,115,22,0.1)]">
+              <div className="relative w-[240px] border border-orange-500/40 bg-orange-900/10 rounded-xl p-4 backdrop-blur-xl shadow-[0_0_50px_rgba(249,115,22,0.2)]">
                 <div className="text-[9px] font-mono tracking-widest text-orange-400 uppercase flex items-center gap-2 mb-4 border-b border-orange-500/20 pb-2">
                   <span className="w-1.5 h-1.5 rounded-sm bg-orange-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
                   [ASSIGNMENTS.SYS]
@@ -291,8 +308,8 @@ export default function LandingPage() {
               animate={phase === 0 ? { opacity: 1, scale: 1, filter: "blur(0px)", x: 150, y: -250 } : { opacity: 0, scale: 0.9, filter: "blur(20px)", x: 250, y: -350 }}
               transition={{ duration: phase === 0 ? 1.5 : 0.4, ease: "easeOut" }}
             >
-              <div className="relative w-[200px] h-[200px] flex items-center justify-center">
-                <div className="absolute top-0 text-[9px] font-mono tracking-widest text-cyan-400 uppercase flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded backdrop-blur-md z-10">
+              <div className="relative w-[200px] h-[200px] border border-cyan-500/40 rounded-full bg-cyan-900/10 shadow-[0_0_60px_rgba(6,182,212,0.2)] flex items-center justify-center backdrop-blur-xl">
+                <div className="absolute top-0 text-[9px] font-mono tracking-widest text-cyan-400 uppercase flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded backdrop-blur-md -translate-y-1/2">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)] animate-ping" />
                   [DEEPWORK.FOCUS]
                 </div>

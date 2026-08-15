@@ -192,30 +192,44 @@ export function Timetable() {
         </div>
       </div>
 
-      {/* Sub Header */}
-      <div className="flex justify-between items-center text-xs flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <span className="font-bold text-zinc-300 tracking-wide uppercase text-[10px]">Today</span>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+              <CalendarDays className="w-6 h-6 text-primary" />
+              Timetable
+            </h1>
+            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold tracking-wider uppercase text-zinc-400">
+              {selectedBatch}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" />
+            <span className="text-blue-400 text-xs font-semibold tracking-wide uppercase">{currentTime}</span>
+            <span className="text-zinc-600 text-xs">•</span>
             <span className="text-zinc-500 text-xs">{now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
           </div>
           
-          {currentClass && (
-            <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600/20 to-emerald-900/20 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
-              <span className="font-bold text-emerald-400 tracking-wider text-[10px] uppercase">Now</span>
-              <span className="font-extrabold text-white max-w-[150px] truncate">{currentClass.subject}</span>
-              <span className="text-emerald-200/60 font-medium">{formatTimeRemaining(parseTime(currentClass.endTime, now))} left</span>
-            </div>
-          )}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            {currentClass && (
+              <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600/20 to-emerald-900/20 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] w-full sm:w-auto">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse shrink-0" />
+                <span className="font-bold text-emerald-400 tracking-wider text-[10px] uppercase shrink-0">Now</span>
+                <span className="font-extrabold text-white truncate max-w-[120px] sm:max-w-[150px]">{currentClass.subject}</span>
+                <span className="text-emerald-200/60 font-medium shrink-0 ml-auto">{formatTimeRemaining(parseTime(currentClass.endTime, now))} left</span>
+              </div>
+            )}
 
-          {nextClass && !currentClass && (
-            <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
-              <span className="font-bold text-primary tracking-wider text-[10px] uppercase">Next</span>
-              <span className="font-semibold text-zinc-300 max-w-[150px] truncate">{nextClass.subject}</span>
-              <span className="text-zinc-500 font-medium">{nextClass.startTime} - {nextClass.room}</span>
-            </div>
-          )}
+            {nextClass && !currentClass && (
+              <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 w-full sm:w-auto">
+                <span className="font-bold text-primary tracking-wider text-[10px] uppercase shrink-0">Next</span>
+                <span className="font-semibold text-zinc-300 truncate max-w-[120px] sm:max-w-[150px]">{nextClass.subject}</span>
+                <span className="text-zinc-500 font-medium shrink-0 ml-auto">{nextClass.startTime} - {nextClass.room}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* View Toggle */}

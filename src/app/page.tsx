@@ -157,7 +157,7 @@ export default function LandingPage() {
       <AnimatePresence>
         {phase < 2 && (
           <motion.div 
-            className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden"
+            className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 overflow-hidden scale-[0.4] sm:scale-75 md:scale-90 lg:scale-100"
             exit={{ opacity: 0, scale: 1.1, filter: "blur(20px)" }}
             transition={{ duration: 1 }}
           >
@@ -346,7 +346,7 @@ export default function LandingPage() {
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute z-20 flex flex-col items-center text-center mt-12 w-full px-6"
           >
-            <h1 className="text-7xl md:text-8xl lg:text-[10rem] font-black tracking-tighter mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-zinc-500 drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]">
+            <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black tracking-tighter mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-zinc-500 drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]">
               NexTime
             </h1>
             
@@ -389,8 +389,8 @@ export default function LandingPage() {
             <div className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.2)] flex items-center justify-center mb-6">
               <GraduationCap className="w-8 h-8 text-blue-400" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-3">Select your Academic Year</h2>
-            <p className="text-zinc-400 text-sm mb-12">Initialize your OS profile by selecting your current year.</p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-3 text-center">Select your Academic Year</h2>
+            <p className="text-zinc-400 text-sm mb-12 text-center">Initialize your OS profile by selecting your current year.</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
               {availableYears.map((year, idx) => (
@@ -438,10 +438,10 @@ export default function LandingPage() {
             <div className="w-16 h-16 rounded-full bg-purple-500/10 border border-purple-500/20 shadow-[0_0_30px_rgba(168,85,247,0.2)] flex items-center justify-center mb-6">
               <Users className="w-8 h-8 text-purple-400" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-3">Select your Batch</h2>
-            <p className="text-zinc-400 text-sm mb-12">Year {selectedYear} • Syncing Timetable Data...</p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-3 text-center">Select your Batch</h2>
+            <p className="text-zinc-400 text-sm mb-8 text-center">Year {selectedYear} • Syncing Timetable Data...</p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-h-[50vh] overflow-y-auto custom-scrollbar p-4 -m-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-h-[50vh] overflow-y-auto custom-scrollbar p-4 -m-4">
               {filteredBatches.map((batch, idx) => (
                 <motion.button
                   key={batch}
@@ -453,11 +453,13 @@ export default function LandingPage() {
                   className="group relative bg-[#0A0A0C]/80 backdrop-blur-xl border border-white/5 hover:border-purple-500/50 rounded-2xl p-4 flex items-center justify-between transition-all duration-300 hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-purple-900/10 shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-700 group-hover:bg-purple-400 group-hover:animate-pulse transition-colors shadow-[0_0_0_rgba(168,85,247,0)] group-hover:shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-                    <span className="font-bold text-lg tracking-wide text-zinc-400 group-hover:text-white transition-colors">{batch}</span>
+                  <div className="flex items-center gap-3 relative z-10 w-full justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-700 group-hover:bg-purple-400 group-hover:animate-pulse transition-colors shadow-[0_0_0_rgba(168,85,247,0)] group-hover:shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                      <span className="font-bold text-lg tracking-wide text-zinc-400 group-hover:text-white transition-colors">{batch}</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-zinc-700 group-hover:text-purple-400 group-hover:translate-x-1 transition-all duration-300" />
                   </div>
-                  <ChevronRight className="w-4 h-4 text-zinc-700 group-hover:text-purple-400 group-hover:translate-x-1 transition-all duration-300 relative z-10" />
                 </motion.button>
               ))}
             </div>

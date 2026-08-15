@@ -15,13 +15,21 @@ import { useTime } from "@/hooks/useTime";
 import { getCurrentClass, getNextClass, parseTime } from "@/lib/timetableUtils";
 
 export function Timetable() {
-  const { selectedBatch, timetables, isLoaded, customEvents } = useAppStore();
+  const { selectedBatch, viewingFriendBatch, setViewingFriendBatch, timetables, isLoaded, customEvents } = useAppStore();
   const [viewMode, setViewMode] = useState<"today" | "week">("week");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isCustomizeMode, setIsCustomizeMode] = useState(false);
   const timetableRef = useRef<HTMLDivElement>(null);
   const now = useTime(1000);
+
+  const { loadTimetables } = useAppStore();
+
+  useEffect(() => {
+    if (!isLoaded) {
+      loadTimetables();
+    }
+  }, [isLoaded, loadTimetables]);
 
   const [filters, setFilters] = useState<Record<ClassType, boolean>>({
     lecture: true,
@@ -35,7 +43,8 @@ export function Timetable() {
     setFilters(prev => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const currentBatchEvents = (selectedBatch && timetables[selectedBatch]) ? timetables[selectedBatch] : [];
+  const effectiveBatch = viewingFriendBatch || selectedBatch;
+  const currentBatchEvents = (effectiveBatch && timetables[effectiveBatch]) ? timetables[effectiveBatch] : [];
   
   // Merge custom events
   const mergedEvents = currentBatchEvents.map(event => {
@@ -114,6 +123,22 @@ export function Timetable() {
       )}
     >
       {/* Top Header */}
+      {viewingFriendBatch && !isDownloading && (
+        <div className="flex items-center justify-between bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+            <span className="text-sm font-bold text-blue-400">
+              👀 Viewing {viewingFriendBatch}'s Timetable
+            </span>
+          </div>
+          <button 
+            onClick={() => setViewingFriendBatch(null)}
+            className="text-xs font-bold bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Return to My Timetable
+          </button>
+        </div>
+      )}
       <div className="flex justify-between items-center flex-shrink-0">
         <div className="flex items-center gap-4">
           {isFullscreen && !isDownloading && (

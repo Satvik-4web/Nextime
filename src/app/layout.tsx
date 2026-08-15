@@ -9,6 +9,7 @@ import { NotificationEngine } from "@/components/dashboard/NotificationEngine";
 import { ToastContainer } from "@/components/navigation/ToastContainer";
 import { CommandPalette } from "@/components/navigation/CommandPalette";
 import { CreatorCredit } from "@/components/navigation/CreatorCredit";
+import { GlobalAudioEnforcer } from "@/components/dashboard/GlobalAudioEnforcer";
 import Script from "next/script";
 
 const inter = Inter({
@@ -44,6 +45,7 @@ export default function RootLayout({
           inter.variable
         )}
       >
+        <GlobalAudioEnforcer />
         <AttendancePrompt />
         <TimerEngine />
         <NotificationEngine />

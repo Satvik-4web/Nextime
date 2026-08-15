@@ -5,14 +5,67 @@ import { Users, Plus, X, Search, ChevronDown, Check } from "lucide-react";
 import { useAppStore } from "@/stores/useAppStore";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useTime } from "@/hooks/useTime";
+import { getCurrentClass } from "@/lib/timetableUtils";
+
+function FriendStatusRow({ batch, timetables, isSelected, onClick, onRemove }: { batch: string, timetables: any, isSelected: boolean, onClick: () => void, onRemove: () => void }) {
+  const now = useTime(60000); // update every minute
+  const events = timetables[batch] || [];
+  const currentClass = getCurrentClass(events, now);
+
+  return (
+    <div 
+      onClick={onClick}
+      className={cn(
+        "flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer group",
+        isSelected ? "bg-blue-500/10 border border-blue-500/20" : "hover:bg-white/5 border border-transparent"
+      )}
+    >
+      <div className="flex flex-col flex-1 min-w-0 pr-2">
+        <div className="flex items-center gap-2">
+          <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", isSelected ? "bg-blue-500" : "bg-zinc-600")} />
+          <span className={cn("font-bold truncate", isSelected ? "text-blue-400" : "text-zinc-200")}>{batch}</span>
+        </div>
+        <div className="flex items-center gap-1.5 mt-0.5 ml-3.5">
+          {currentClass ? (
+            <>
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+              <span className="text-[10px] font-medium text-emerald-400 truncate">
+                {currentClass.subject} ({currentClass.room})
+              </span>
+            </>
+          ) : (
+            <>
+              <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+              <span className="text-[10px] font-medium text-zinc-500">
+                Free slot
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-white/10 text-zinc-500 hover:text-red-400 transition-all shrink-0"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
 
 export function FriendsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [search, setSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  const { allBatches, pinnedBatches, selectedBatch, setSelectedBatch, pinBatch, unpinBatch } = useAppStore();
+  const { allBatches, pinnedBatches, selectedBatch, setSelectedBatch, setViewingFriendBatch, pinBatch, unpinBatch, timetables } = useAppStore();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -75,31 +128,18 @@ export function FriendsDropdown() {
                     </div>
                   ) : (
                     pinnedBatches.map(batch => (
-                      <div 
+                      <FriendStatusRow 
                         key={batch}
+                        batch={batch}
+                        timetables={timetables}
+                        isSelected={selectedBatch === batch}
                         onClick={() => {
-                          setSelectedBatch(batch);
+                          setViewingFriendBatch(batch);
                           setIsOpen(false);
+                          router.push('/timetable');
                         }}
-                        className={cn(
-                          "flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all cursor-pointer group",
-                          selectedBatch === batch ? "bg-blue-500/10 text-blue-400" : "hover:bg-white/5 text-zinc-300 hover:text-white"
-                        )}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className={cn("w-1.5 h-1.5 rounded-full", selectedBatch === batch ? "bg-blue-500" : "bg-transparent")} />
-                          <span className="font-medium">{batch}</span>
-                        </div>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            unpinBatch(batch);
-                          }}
-                          className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-white/10 text-zinc-500 hover:text-red-400 transition-all"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
+                        onRemove={() => unpinBatch(batch)}
+                      />
                     ))
                   )}
                 </div>

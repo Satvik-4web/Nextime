@@ -14,6 +14,7 @@ export interface Assignment {
 
 interface AppState {
   selectedBatch: string | null;
+  viewingFriendBatch: string | null;
   allBatches: string[];
   timetables: Record<string, TimetableEvent[]>;
   isLoaded: boolean;
@@ -44,6 +45,7 @@ interface AppState {
   resetBoot: () => void;
   
   setSelectedBatch: (batch: string) => void;
+  setViewingFriendBatch: (batch: string | null) => void;
   loadTimetables: () => Promise<void>;
   pinBatch: (batch: string) => void;
   unpinBatch: (batch: string) => void;
@@ -69,6 +71,7 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       selectedBatch: null,
+      viewingFriendBatch: null,
       allBatches: [],
       timetables: {},
       isLoaded: false,
@@ -95,8 +98,22 @@ export const useAppStore = create<AppState>()(
       completeBoot: () => set({ hasCompletedBoot: true, bootPhase: 8 }),
       resetBoot: () => set({ hasCompletedBoot: false, bootPhase: 0 }),
 
-      setSelectedBatch: (batch) => {
-        set({ selectedBatch: batch });
+      setSelectedBatch: (batch) => set({ selectedBatch: batch }),
+      setViewingFriendBatch: (batch) => set({ viewingFriendBatch: batch }),
+      loadTimetables: async () => {
+        try {
+          const response = await fetch("/timetables.json");
+          const data = await response.json();
+          const batches = Object.keys(data);
+          
+          set({ 
+            timetables: data, 
+            allBatches: batches,
+            isLoaded: true 
+          });
+        } catch (error) {
+          console.error("Failed to load timetables:", error);
+        }
       },
 
       pinBatch: (batch) => {
@@ -236,22 +253,6 @@ export const useAppStore = create<AppState>()(
           return { timeLeft: state.timeLeft - 1 };
         });
       },
-
-      loadTimetables: async () => {
-        try {
-          const response = await fetch("/timetables.json");
-          const data = await response.json();
-          const batches = Object.keys(data);
-          
-          set({ 
-            timetables: data, 
-            allBatches: batches,
-            isLoaded: true 
-          });
-        } catch (error) {
-          console.error("Failed to load timetables:", error);
-        }
-      }
     }),
     {
       name: "nextime-store",

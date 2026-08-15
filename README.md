@@ -1,84 +1,78 @@
+# 🚀 NexTime – The Premium Student OS
+
 <div align="center">
-  
-  # 🚀 NexTime: Smart Student OS
-  
-  **The ultimate operating system for students.**  
-  *Timetables, Deep Work, Analytics, and Community — all in one hyper-optimized, glassmorphic workspace.*
-
-  [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-  [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
-  [![Framer Motion](https://img.shields.io/badge/Framer_Motion-Animation-FF0055?style=for-the-badge&logo=framer)](https://www.framer.com/motion/)
-
+  <img src="file:///C:/Users/satvi/.gemini/antigravity/brain/54819213-3789-4a1c-a20f-d488b9fb9572/nextime_hero_1786830533717.jpg" alt="NexTime Hero" width="800"/>
 </div>
 
 ---
 
-## ✨ Features
+## ✨ What is NexTime?
+**NexTime** is a hyper‑optimized, glass‑morphic operating system designed exclusively for students. It fuses timetables, deep‑work timers, analytics, and a global friends network into a **single, immersive fullscreen experience** – no more tab‑hopping, no more distraction.
 
-NexTime is not just a dashboard—it is a full-screen, fixed-viewport "Operating System" designed to lock you into a state of flow.
+---
 
-- 🗓️ **Cinematic Timetable Grid**: View your schedule with beautiful color-coded glow effects (Blue for Lectures, Cyan for Labs, Purple for Tutorials).
-- 🤝 **Global Friends System**: Pin your friends' batches and instantly switch your entire OS to their view with a single click.
-- ⏱️ **Deep Work Timer**: Built-in Pomodoro/Focus timer with real-time sync and satisfying acoustic feedback.
-- 💬 **Live Community Feed**: A global chat synced in real-time via Supabase, allowing students across batches to communicate instantly.
-- 📊 **CGPA & Attendance Analytics**: Track your projected grades and attendance metrics with stunning data visualizations.
-- 📲 **PWA Ready**: Install NexTime natively on your iPhone, Android, or Desktop as a standalone application.
+## 🌟 Core Features
+- **🗓️ Cinematic Timetable Grid** – Color‑coded, glow‑enhanced blocks (blue = lectures, cyan = labs, purple = tutorials) with smooth scrolling and hover animations.
+- **🤝 Global Friends System** – Pin classmates, instantly view their schedule, and see live class status with a sleek banner.
+- **⏱️ Deep‑Work Pomodoro Timer** – Real‑time syncing, acoustic feedback, and elegant radial progress.
+- **💬 Live Community Feed** – Powered by Supabase Realtime, chat across batches instantly.
+- **📊 CGPA & Attendance Dashboard** – Interactive charts, predictive analytics, and exportable reports.
+- **📱 PWA Ready** – Install on any device; works offline with cached assets.
+- **🔒 Secure & Scalable** – Supabase for auth & DB, Upstash Redis for rate‑limiting.
 
 ---
 
 ## 🛠️ Tech Stack
-
-- **Framework**: Next.js (App Router, Turbopack)
-- **Styling**: Tailwind CSS + Custom CSS (Glassmorphism, Custom Scrollbars)
-- **State Management**: Zustand
-- **Animations**: Framer Motion
-- **Database & Realtime**: Supabase
-- **Rate Limiting & Redis**: Upstash
-- **Icons**: Lucide React
+| Layer | Technology |
+|-------|------------|
+| **Framework** | **Next.js 14** (App Router, Turbopack) |
+| **Styling** | **Tailwind CSS** + custom glass‑morphic CSS |
+| **State** | **Zustand** (persisted) |
+| **Animations** | **Framer Motion** |
+| **Database & Realtime** | **Supabase** |
+| **Rate‑Limiting / Cache** | **Upstash Redis** |
+| **Icons** | **Lucide React** |
 
 ---
 
 ## 🚀 Getting Started (Local Development)
-
-### 1. Clone the repository
 ```bash
-git clone https://github.com/Satvik-4web/Nextime.git
-cd Nextime
-```
+# 1️⃣ Clone the repo
+git clone https://github.com/Satvik-4web/Nextime.git && cd Nextime
 
-### 2. Install dependencies
-```bash
+# 2️⃣ Install dependencies
 npm install
-```
 
-### 3. Environment Variables
-Create a `.env.local` file in the root directory and add your API keys:
-
-```env
-# Supabase (Database & Realtime)
+# 3️⃣ Configure environment variables
+cat <<EOF > .env.local
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Upstash Redis (Rate Limiting)
 UPSTASH_REDIS_REST_URL=your_upstash_url
 UPSTASH_REDIS_REST_TOKEN=your_upstash_token
-```
+EOF
 
-### 4. Run the Development Server
-```bash
+# 4️⃣ Run the dev server
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open **[http://localhost:3000](http://localhost:3000)** in your browser. The OS will launch in fullscreen mode automatically.
 
 ---
 
 ## 🎨 Design Philosophy
+1. **No generic UI** – Every component uses layered `backdrop-blur`, semi‑transparent borders, and subtle gradients.
+2. **Micro‑interactions** – Hover/press states scale elements, shift shadows, and trigger low‑pass‑filtered audio clicks.
+3. **Fixed Viewport** – The body scrollbar is hidden; the OS scales to fill the screen, eliminating “website fatigue”.
+4. **Premium Visuals** – Glass‑morphism, neon accents, and smooth motion create a state‑of‑the‑art experience.
 
-NexTime was built with a strict aesthetic guideline:
-1. **No generic UI**: Every button, modal, and panel utilizes layered `backdrop-blur` and semi-transparent borders to create depth.
-2. **Micro-Interactions**: Hover states scale elements, shift shadows, and trigger subtle lowpass-filtered WebAudio clicks.
-3. **Fixed Viewport**: The global body scrollbar is hidden. The OS scales to fit your screen exactly, preventing "website fatigue".
+---
+
+## 🤝 Contributing
+We welcome contributions! Fork the repo, make your improvements, and submit a PR. Please follow the existing aesthetic guidelines and keep the UI premium.
+
+---
+
+## 📜 License
+Distributed under the **MIT License**. See `LICENSE` for details.
 
 ---
 

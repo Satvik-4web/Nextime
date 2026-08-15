@@ -46,7 +46,6 @@ export default function LandingPage() {
   }, []);
 
   const handleExploreClick = () => {
-    playFuturisticSound('click');
     if (selectedBatch) {
       setPhase(4);
       playFuturisticSound('warp');
@@ -57,13 +56,11 @@ export default function LandingPage() {
   };
 
   const handleYearSelect = (year: string) => {
-    playFuturisticSound('click');
     setSelectedYear(year);
     setPhase(3);
   };
 
   const handleBatchSelect = (batch: string) => {
-    playFuturisticSound('click');
     setSelectedBatch(batch);
     setPhase(4);
     playFuturisticSound('warp');
@@ -114,19 +111,19 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-8 text-sm font-semibold text-zinc-300">
               <button 
-                onClick={() => { playFuturisticSound('click'); setActiveModal("Vision"); }}
+                onClick={() => setActiveModal("Vision")}
                 className="hover:text-white transition-colors"
               >
                 Vision
               </button>
               <button 
-                onClick={() => { playFuturisticSound('click'); setActiveModal("Features"); }}
+                onClick={() => setActiveModal("Features")}
                 className="hover:text-white transition-colors"
               >
                 Features
               </button>
               <button 
-                onClick={() => { playFuturisticSound('click'); setActiveModal("Install OS"); }}
+                onClick={() => setActiveModal("Install OS")}
                 className="hover:text-white transition-colors flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 hover:bg-white/10"
               >
                 Install OS
@@ -379,20 +376,28 @@ export default function LandingPage() {
               {availableYears.map((year, idx) => (
                 <motion.button
                   key={year}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1, duration: 0.5, ease: "easeOut" }}
+                  initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: idx * 0.1, duration: 0.6, type: "spring", stiffness: 80 }}
                   onClick={() => handleYearSelect(year)}
                   onMouseEnter={() => playFuturisticSound('hover')}
-                  className="group relative bg-[#0A0A0C] border border-white/5 hover:border-blue-500/50 rounded-2xl p-6 flex flex-col items-center justify-center transition-all hover:bg-blue-500/5 overflow-hidden"
+                  className="group relative bg-[#0A0A0C]/80 backdrop-blur-2xl border border-white/5 hover:border-blue-500/50 rounded-3xl p-8 flex flex-col items-center justify-center transition-all duration-500 hover:bg-gradient-to-br hover:from-blue-500/10 hover:to-blue-900/10 shadow-lg hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:-translate-y-2 overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-blue-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-500 group-hover:to-blue-400 transition-colors mb-2">
-                    {year}
-                  </span>
-                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 group-hover:text-blue-300 transition-colors">
-                    Year {year}
-                  </span>
+                  {/* Subtle inner glow */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-500/0 via-blue-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  {/* Glowing orbital ring */}
+                  <div className="absolute -inset-[100%] bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(59,130,246,0.3)_360deg)] opacity-0 group-hover:opacity-100 group-hover:animate-[spin_4s_linear_infinite]" />
+                  <div className="absolute inset-[1px] bg-[#0A0A0C]/90 rounded-3xl z-0" />
+
+                  <div className="relative z-10 flex flex-col items-center">
+                    <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600 group-hover:from-white group-hover:to-blue-400 transition-all duration-300 drop-shadow-sm mb-3">
+                      {year}
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 group-hover:text-blue-300 transition-colors duration-300">
+                      Year {year}
+                    </span>
+                  </div>
                 </motion.button>
               ))}
             </div>
@@ -416,19 +421,23 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-3">Select your Batch</h2>
             <p className="text-zinc-400 text-sm mb-12">Year {selectedYear} • Syncing Timetable Data...</p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-h-[50vh] overflow-y-auto custom-scrollbar p-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-h-[50vh] overflow-y-auto custom-scrollbar p-4 -m-4">
               {filteredBatches.map((batch, idx) => (
                 <motion.button
                   key={batch}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: (idx % 10) * 0.05, duration: 0.3 }}
+                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: (idx % 10) * 0.04, duration: 0.4, type: "spring", stiffness: 100 }}
                   onClick={() => handleBatchSelect(batch)}
                   onMouseEnter={() => playFuturisticSound('hover')}
-                  className="group relative bg-[#0A0A0C] border border-white/10 hover:border-purple-500/50 rounded-xl p-4 flex items-center justify-between transition-all hover:bg-purple-500/10"
+                  className="group relative bg-[#0A0A0C]/80 backdrop-blur-xl border border-white/5 hover:border-purple-500/50 rounded-2xl p-4 flex items-center justify-between transition-all duration-300 hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-purple-900/10 shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] overflow-hidden"
                 >
-                  <span className="font-bold text-lg text-zinc-300 group-hover:text-white transition-colors">{batch}</span>
-                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-purple-400 transition-colors" />
+                  <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-700 group-hover:bg-purple-400 group-hover:animate-pulse transition-colors shadow-[0_0_0_rgba(168,85,247,0)] group-hover:shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                    <span className="font-bold text-lg tracking-wide text-zinc-400 group-hover:text-white transition-colors">{batch}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-700 group-hover:text-purple-400 group-hover:translate-x-1 transition-all duration-300 relative z-10" />
                 </motion.button>
               ))}
             </div>

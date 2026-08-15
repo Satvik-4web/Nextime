@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAppStore } from "@/stores/useAppStore";
-import { ChevronRight, GraduationCap, Users } from "lucide-react";
+import { ChevronRight, GraduationCap, Users, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { playFuturisticSound } from "@/lib/audio";
 import { Footer } from "@/components/navigation/Footer";
@@ -23,6 +23,7 @@ export default function LandingPage() {
   const { allBatches, loadTimetables, setSelectedBatch, selectedBatch } = useAppStore();
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<"Vision" | "Features" | "Install OS" | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Load timetables data on mount so batches are available
   useEffect(() => {
@@ -60,6 +61,7 @@ export default function LandingPage() {
   const handleYearSelect = (year: string) => {
     playFuturisticSound('hover');
     setSelectedYear(year);
+    setSearchQuery("");
     setPhase(3);
   };
 
@@ -76,11 +78,18 @@ export default function LandingPage() {
     return Array.from(years).filter(y => !isNaN(parseInt(y))).sort();
   }, [allBatches]);
 
-  // Filter batches by selected year
+  // Filter batches by selected year and search query
   const filteredBatches = useMemo(() => {
     if (!selectedYear) return [];
-    return allBatches.filter(b => b.charAt(0) === selectedYear).sort();
-  }, [allBatches, selectedYear]);
+    let batches = allBatches.filter(b => b.charAt(0) === selectedYear).sort();
+    
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase().trim();
+      batches = batches.filter(b => b.toLowerCase().includes(q));
+    }
+    
+    return batches;
+  }, [allBatches, selectedYear, searchQuery]);
 
   return (
     <div className="relative min-h-[100dvh] bg-[#020202] overflow-x-hidden font-sans text-white selection:bg-blue-500/30 flex flex-col">
@@ -439,9 +448,22 @@ export default function LandingPage() {
               <Users className="w-8 h-8 text-purple-400" />
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-3 text-center">Select your Batch</h2>
-            <p className="text-zinc-400 text-sm mb-8 text-center">Year {selectedYear} • Syncing Timetable Data...</p>
+            <p className="text-zinc-400 text-sm mb-6 text-center">Year {selectedYear} • Syncing Timetable Data...</p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-h-[50vh] overflow-y-auto custom-scrollbar p-4 -m-4">
+            <div className="relative w-full max-w-md mb-8">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-zinc-500" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search batch (e.g. 3C11)..."
+                className="w-full bg-[#0A0A0C]/80 border border-white/10 rounded-full py-3 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all backdrop-blur-xl shadow-lg"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-h-[45vh] overflow-y-auto custom-scrollbar p-4 -m-4">
               {filteredBatches.map((batch, idx) => (
                 <motion.button
                   key={batch}

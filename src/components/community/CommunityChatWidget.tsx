@@ -5,6 +5,9 @@ import { Send, Users, Sparkles, MessageCircle, X } from "lucide-react";
 import { getNowMs } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import { useAppStore } from "@/stores/useAppStore";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 interface ChatMessage {
   id: string;
@@ -22,9 +25,47 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 
 export function CommunityChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [onlineCount, setOnlineCount] = useState(1);
   const endRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const { selectedBatch } = useAppStore();
+
+  useEffect(() => {
+    // Setup Supabase Realtime Broadcast
+    const channel = supabase.channel('study-lounge', {
+      config: {
+        broadcast: { ack: false },
+        presence: { key: selectedBatch || 'Anon' }
+      }
+    });
+
+    channelRef.current = channel;
+
+    channel
+      .on('broadcast', { event: 'chat-message' }, ({ payload }) => {
+        setMessages(prev => {
+          // Prevent duplicates
+          if (prev.find(m => m.id === payload.id)) return prev;
+          return [...prev, { ...payload, isSelf: false }];
+        });
+      })
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const count = Object.keys(state).length;
+        setOnlineCount(count > 0 ? count : 1);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ online_at: new Date().toISOString() });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedBatch]);
 
   useEffect(() => {
     if (isOpen) {
@@ -36,16 +77,23 @@ export function CommunityChatWidget() {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    setMessages(prev => [
-      ...prev,
-      {
-        id: getNowMs().toString(),
-        author: "You",
-        text: inputValue.trim(),
-        timestamp: getNowMs(),
-        isSelf: true
-      }
-    ]);
+    const newMessage: ChatMessage = {
+      id: getNowMs().toString() + Math.random().toString(),
+      author: selectedBatch || "Anon",
+      text: inputValue.trim(),
+      timestamp: getNowMs(),
+      isSelf: true
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    
+    // Broadcast to others
+    channelRef.current?.send({
+      type: 'broadcast',
+      event: 'chat-message',
+      payload: { ...newMessage, isSelf: false }
+    });
+    
     setInputValue("");
   };
 
@@ -69,7 +117,9 @@ export function CommunityChatWidget() {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">Study Lounge</h3>
-                  <p className="text-[10px] text-zinc-500 font-medium">12 online now</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-zinc-400">{onlineCount} online now</span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
